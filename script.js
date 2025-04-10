@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 섹션별로 항목들을 구성합니다.
+    // 각 섹션별 항목들을 구성합니다.
     var sections = [
         {
             title: "기본",
@@ -50,8 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
-    // 모든 섹션을 채울 컨테이너 선택
+    // 모든 섹션을 담을 컨테이너 선택
     var container = document.getElementById('checklistContainer');
+    if (!container) {
+        console.error("체크리스트 컨테이너(div#checklistContainer)를 찾을 수 없습니다.");
+        return;
+    }
 
     // 각 섹션에 대해 처리
     sections.forEach(function(section) {
@@ -76,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var label = document.createElement('label');
             label.htmlFor = item.id;
             label.textContent = item.text;
-            // 체크 해제 시 원본 텍스트로 복원할 수 있도록 저장
+            // 원본 텍스트 저장 (체크 해제 시 복원 용도)
             label.dataset.originalText = item.text;
 
             li.appendChild(checkbox);
@@ -86,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
         container.appendChild(ul);
     });
 
-    // 이벤트 위임: 체크박스 체크/해제 시 처리
+    // 이벤트 위임: 체크박스 체크/해제 시 스타일과 이모지 업데이트
     container.addEventListener('change', function(event) {
         if (event.target && event.target.matches('input[type="checkbox"]')) {
             var checkbox = event.target;
