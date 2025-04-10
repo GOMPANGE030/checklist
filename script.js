@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return null;
     }
 
-    // 동일 항목 배열 (두 사람 모두 동일한 항목을 사용)
-    var sections = [
+    // [진규]의 체크리스트 섹션 (변경 전 그대로)
+    var defaultSections = [
         {
             title: "기본",
             items: [
@@ -73,67 +73,124 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
-    // 현재 선택된 사람의 이름 (기본은 진규)
+    // [민경]용 새 체크리스트 섹션
+    var minkyungSections = [
+        {
+            title: "기본",
+            items: [
+                { id: 'm_item1', text: '여권/복사본' },
+                { id: 'm_item2', text: '신분증' },
+                { id: 'm_item3', text: '항공권/복사본' },
+                { id: 'm_item4', text: '카드(트레블월렛, 트레블로그, 한국용카드)' },
+                { id: 'm_item5', text: '대만돈 + 동전지갑' },
+                { id: 'm_item6', text: '충전선 usb타입, c타입, c투c, 애플워치충전기' },
+                { id: 'm_item7', text: '보조배터리' },
+                { id: 'm_item8', text: '들고다니는 가방' },
+                { id: 'm_item9', text: '칙칙이, 알갱이, 리스테린종이' },
+                { id: 'm_item10', text: '칫솔치약' },
+                { id: 'm_item11', text: '림밤용 거울' },
+                { id: 'm_item12', text: '셀카봉' },
+                { id: 'm_item13', text: '선그리/안경' },
+                { id: 'm_item14', text: '우산' },
+                { id: 'm_item15', text: '향' }
+            ]
+        },
+        {
+            title: "의복",
+            items: [
+                { id: 'm_item16', text: '1일 검나시, 청치마, 여름이가디건' },
+                { id: 'm_item17', text: '2일 흰나시, 체크치마, 봄가디건' },
+                { id: 'm_item18', text: '3일 출입국날 같은 히피체크 or 파란셔츠 챙길것' },
+                { id: 'm_item19', text: '팬티 4개, 브라 3개, 흰티1개' },
+                { id: 'm_item20', text: '양말' },
+                { id: 'm_item21', text: '잠옷용 검반팔, 잠옷바지' }
+            ]
+        },
+        {
+            title: "세안",
+            items: [
+                { id: 'm_item22', text: '샴푸, 트리트먼트' },
+                { id: 'm_item23', text: '클렌징폼, 클렌징오일, 로션' },
+                { id: 'm_item24', text: '바디로션 더 소분' },
+                { id: 'm_item25', text: '샴푸 통 씻고 지금거 담을지 고민' }
+            ]
+        },
+        {
+            title: "헤어",
+            items: [
+                { id: 'm_item26', text: '롤빗(진규도 내꺼써)' },
+                { id: 'm_item27', text: '왕빗' },
+                { id: 'm_item28', text: '헤어롤' },
+                { id: 'm_item29', text: '고데기' },
+                { id: 'm_item30', text: '헤어에센스' }
+            ]
+        },
+        {
+            title: "화장",
+            items: [
+                { id: 'm_item31', text: '렌즈 5쌍' },
+                { id: 'm_item32', text: '화장품 내일아침에 가방에 챙기기' }
+            ]
+        }
+    ];
+
+    // 현재 선택된 사람의 기본값: "진규"
     var currentPerson = "진규";
-    
-    // 체크리스트 컨테이너
+
+    // 체크리스트 컨테이너 및 사람 선택 드롭다운
     var container = document.getElementById('checklistContainer');
     if (!container) {
         console.error("체크리스트 컨테이너(div#checklistContainer)를 찾을 수 없습니다.");
         return;
     }
-    
-    // 사람 선택 드롭다운
     var personSelect = document.getElementById('personSelect');
     if (!personSelect) {
         console.error("사람 선택 드롭다운(select#personSelect)를 찾을 수 없습니다.");
         return;
     }
 
-    // UI 초기화: 현재 선택된 사람의 상태를 불러오고 UI 생성
+    // 초기 UI 로드
     loadUI(currentPerson);
-    
-    // 사람 선택 변경 시 UI 다시 빌드
+
+    // 사람 선택 변경 시 UI 재로딩
     personSelect.addEventListener('change', function(event) {
         currentPerson = event.target.value;
         loadUI(currentPerson);
     });
-    
-    // UI를 불러오는 함수: 쿠키에서 해당 사람의 체크 상태를 불러온 후 UI 빌드
+
+    // UI 로드: 현재 선택한 사람에 따른 쿠키를 읽어와서 UI를 구성
     function loadUI(person) {
-        // 쿠키 이름: checklistState_진규 또는 checklistState_민경
-        var cookieState = getCookie("checklistState_" + person);
+        // 쿠키 키 예: checklistState_진규 또는 checklistState_민경
+        var cookieKey = "checklistState_" + person;
+        var cookieState = getCookie(cookieKey);
         var checklistState = cookieState ? JSON.parse(cookieState) : {};
-        // 컨테이너 초기화
-        container.innerHTML = "";
-        buildUI(checklistState, person);
+        container.innerHTML = "";  // 기존 UI 초기화
+
+        // 선택한 사람에 따라 사용할 섹션 배열 결정
+        var sections = (person === "민경") ? minkyungSections : defaultSections;
+        buildUI(sections, checklistState);
     }
-    
-    // UI 생성 함수 (sections 배열을 이용)
-    function buildUI(savedState, person) {
+
+    // UI 구성 함수: 섹션 배열과 저장된 체크 상태를 반영하여 체크리스트 생성
+    function buildUI(sections, savedState) {
         sections.forEach(function(section) {
-            // 섹션 제목 생성
             var header = document.createElement('h2');
             header.className = 'section-header';
             header.textContent = section.title;
             container.appendChild(header);
 
-            // 섹션 항목 목록 생성
             var ul = document.createElement('ul');
             section.items.forEach(function(item) {
                 var li = document.createElement('li');
                 li.className = 'checklist-item';
 
-                // 체크박스 생성
                 var checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
-                // 각 항목 아이디는 그대로 사용하되, 체크 상태는 해당 사람의 쿠키 값에서 적용
                 checkbox.id = item.id;
                 if (savedState[item.id]) {
                     checkbox.checked = true;
                 }
 
-                // 레이블 생성
                 var label = document.createElement('label');
                 label.htmlFor = item.id;
                 label.textContent = item.text;
@@ -150,22 +207,18 @@ document.addEventListener('DOMContentLoaded', function() {
             container.appendChild(ul);
         });
     }
-    
-    // 체크박스 이벤트 처리: 변경 시 쿠키 업데이트 (선택한 사람의 상태)
+
+    // 체크박스 변경 이벤트 처리: 변화 시 해당 사람의 쿠키 업데이트
     container.addEventListener('change', function(event) {
         if (event.target && event.target.matches('input[type="checkbox"]')) {
             var checkbox = event.target;
             var label = checkbox.nextElementSibling;
-            
-            // 현재 사람에 대한 쿠키 키
             var cookieKey = "checklistState_" + currentPerson;
-            // 기존 쿠키 상태를 가져온 후 업데이트
             var cookieState = getCookie(cookieKey);
             var checklistState = cookieState ? JSON.parse(cookieState) : {};
             checklistState[checkbox.id] = checkbox.checked;
-            // 쿠키에 100일간 저장
             setCookie(cookieKey, JSON.stringify(checklistState), 100);
-            
+
             if (checkbox.checked) {
                 label.classList.add('checked');
                 label.innerHTML = label.dataset.originalText + " ✅";
