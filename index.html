@@ -11,12 +11,17 @@
       margin: 20px;
       font-size: 18px;
     }
-    /* 상단 헤더 영역를 flex로 구성하여 체크리스트 문구와 드롭다운을 좌우로 배치 */
+    /* 상단 헤더 영역: 줄바꿈 없이 한 줄로 유지 */
     .header-container {
        display: flex;
        justify-content: space-between;
        align-items: center;
        margin-bottom: 20px;
+       flex-wrap: nowrap;
+    }
+    h1 {
+      white-space: nowrap;
+      margin: 0;
     }
     /* 섹션 제목(카테고리)은 항목보다 크게, 볼드로 */
     .section-header {
@@ -45,7 +50,7 @@
 <body>
   <div class="header-container">
     <h1>체크리스트</h1>
-    <!-- 드롭다운을 오른쪽에 배치하고, 기본값은 민경 -->
+    <!-- 드롭다운을 오른쪽에 배치하며 기본 선택값은 민경 -->
     <div>
       <label for="personSelect">사람 선택: </label>
       <select id="personSelect">
@@ -58,7 +63,7 @@
   <!-- 체크리스트가 채워질 영역 -->
   <div id="checklistContainer"></div>
   
-  <!-- JS 파일 연결 (이전과 동일) -->
+  <!-- JS 파일 연결 (script.js는 그대로 동일) -->
   <script src="script.js"></script>
 </body>
 </html>
