@@ -11,7 +11,14 @@
       margin: 20px;
       font-size: 18px;
     }
-    /* 섹션 제목(카테고리)는 항목보다 크게, 볼드로 */
+    /* 상단 헤더 영역를 flex로 구성하여 체크리스트 문구와 드롭다운을 좌우로 배치 */
+    .header-container {
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       margin-bottom: 20px;
+    }
+    /* 섹션 제목(카테고리)은 항목보다 크게, 볼드로 */
     .section-header {
       font-size: 24px;
       font-weight: bold;
@@ -27,23 +34,31 @@
       font-weight: bold;
       color: blue;
     }
+    /* 드롭다운 스타일 조정 */
+    select#personSelect {
+      width: 150px;
+      font-size: 18px;
+      padding: 5px;
+    }
   </style>
 </head>
 <body>
-  <h1>체크리스트</h1>
-  <!-- 사람 선택 드롭다운 (진규 / 민경) -->
-  <div>
-    <label for="personSelect">사람 선택: </label>
-    <select id="personSelect">
-      <option value="진규">진규</option>
-      <option value="민경">민경</option>
-    </select>
+  <div class="header-container">
+    <h1>체크리스트</h1>
+    <!-- 드롭다운을 오른쪽에 배치하고, 기본값은 민경 -->
+    <div>
+      <label for="personSelect">사람 선택: </label>
+      <select id="personSelect">
+        <option value="민경">민경</option>
+        <option value="진규">진규</option>
+      </select>
+    </div>
   </div>
   
-  <!-- 체크리스트가 채워질 컨테이너 -->
+  <!-- 체크리스트가 채워질 영역 -->
   <div id="checklistContainer"></div>
   
-  <!-- JavaScript 파일 연결 -->
+  <!-- JS 파일 연결 (이전과 동일) -->
   <script src="script.js"></script>
 </body>
 </html>
