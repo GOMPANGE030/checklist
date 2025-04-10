@@ -13,12 +13,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Firebase 초기화
     firebase.initializeApp(firebaseConfig);
 
-    // 익명 인증을 통해 사용자 식별 (동일 디바이스에서는 동일한 익명 계정 유지)
-    firebase.auth().signInAnonymously().then((result) => {
+    // 인증 지속성을 LOCAL로 설정하여, 페이지 새로고침 시에도 동일한 익명 사용자 유지
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(function() {
+        return firebase.auth().signInAnonymously();
+    })
+    .then((result) => {
         const uid = result.user.uid;
         // 사용자의 체크리스트 상태를 저장할 경로 설정
         const stateRef = firebase.database().ref('users/' + uid + '/checklistState');
-        // 데이터베이스에서 기존 체크 상태를 가져옴
+        // 데이터베이스에서 기존 체크 상태 가져오기
         stateRef.once('value').then((snapshot) => {
             var savedState = snapshot.val() || {};
             buildUI(savedState, uid);
@@ -26,13 +30,14 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error(err);
             buildUI({}, uid); // 에러 발생 시 빈 상태로 UI 빌드
         });
-    }).catch((error) => {
-        console.error("익명 인증 실패:", error);
-        // 인증 실패 시(또는 네트워크 오류) 빈 상태로 UI 빌드 (서버 저장 기능 없이 동작)
+    })
+    .catch((error) => {
+        console.error("인증 설정 또는 익명 인증 실패:", error);
+        // 인증 실패 시(또는 네트워크 오류) 빈 상태로 UI 빌드
         buildUI({}, null);
     });
 
-    // 체크리스트 UI 구성 및 이벤트 연결
+    // 체크리스트 UI 구성 및 이벤트 연결 함수
     function buildUI(savedState, uid) {
         // 섹션 및 항목 배열 (수정 및 추가가 용이함)
         var sections = [
@@ -91,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // 각 섹션별로 UI 생성
+        // 각 섹션별 UI 생성
         sections.forEach(function(section) {
             // 섹션 제목 생성
             var header = document.createElement('h2');
@@ -130,13 +135,13 @@ document.addEventListener('DOMContentLoaded', function() {
             container.appendChild(ul);
         });
 
-        // 이벤트 위임: 체크박스 체크/해제 시 UI 업데이트 및 데이터베이스에 상태 저장
+        // 이벤트 위임: 체크박스 체크/해제 시 UI 업데이트 및 Firebase에 상태 저장
         container.addEventListener('change', function(event) {
             if (event.target && event.target.matches('input[type="checkbox"]')) {
                 var checkbox = event.target;
                 var label = checkbox.nextElementSibling;
 
-                // Firebase에 해당 항목의 체크 상태 업데이트 (uid가 있을 때만)
+                // Firebase에 체크 상태 업데이트 (uid가 있을 때만)
                 if (uid) {
                     var userStateRef = firebase.database().ref('users/' + uid + '/checklistState/' + checkbox.id);
                     userStateRef.set(checkbox.checked);
