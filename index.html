@@ -28,17 +28,22 @@
       color: blue;
     }
   </style>
-  <!-- Firebase SDK (호환 버전) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <h1>체크리스트</h1>
-  <!-- 각 섹션 및 항목이 채워질 컨테이너 -->
+  <!-- 사람 선택 드롭다운 (진규 / 민경) -->
+  <div>
+    <label for="personSelect">사람 선택: </label>
+    <select id="personSelect">
+      <option value="진규">진규</option>
+      <option value="민경">민경</option>
+    </select>
+  </div>
+  
+  <!-- 체크리스트가 채워질 컨테이너 -->
   <div id="checklistContainer"></div>
   
-  <!-- 아래 script.js 파일은 index.html과 동일 폴더에 위치해야 합니다 -->
+  <!-- JavaScript 파일 연결 -->
   <script src="script.js"></script>
 </body>
 </html>
