@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+
     // 쿠키 처리 유틸리티 함수
     function setCookie(name, value, days) {
         var expires = "";
@@ -21,11 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return null;
     }
 
-    // 쿠키 "checklistState"에서 저장된 체크 상태 읽기 (없으면 빈 객체)
-    var cookieState = getCookie("checklistState");
-    var checklistState = cookieState ? JSON.parse(cookieState) : {};
-
-    // 섹션별 항목 배열
+    // 동일 항목 배열 (두 사람 모두 동일한 항목을 사용)
     var sections = [
         {
             title: "기본",
@@ -76,62 +73,99 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
-    // 모든 섹션을 채울 컨테이너 선택
+    // 현재 선택된 사람의 이름 (기본은 진규)
+    var currentPerson = "진규";
+    
+    // 체크리스트 컨테이너
     var container = document.getElementById('checklistContainer');
     if (!container) {
         console.error("체크리스트 컨테이너(div#checklistContainer)를 찾을 수 없습니다.");
         return;
     }
+    
+    // 사람 선택 드롭다운
+    var personSelect = document.getElementById('personSelect');
+    if (!personSelect) {
+        console.error("사람 선택 드롭다운(select#personSelect)를 찾을 수 없습니다.");
+        return;
+    }
 
-    // 각 섹션의 UI 생성
-    sections.forEach(function(section) {
-        // 섹션 제목 생성
-        var header = document.createElement('h2');
-        header.className = 'section-header';
-        header.textContent = section.title;
-        container.appendChild(header);
-
-        // 섹션 항목 목록 생성
-        var ul = document.createElement('ul');
-        section.items.forEach(function(item) {
-            var li = document.createElement('li');
-            li.className = 'checklist-item';
-
-            // 체크박스 생성 및 쿠키에 저장된 상태 적용
-            var checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = item.id;
-            if (checklistState[item.id]) {
-                checkbox.checked = true;
-            }
-
-            // 레이블 생성
-            var label = document.createElement('label');
-            label.htmlFor = item.id;
-            label.textContent = item.text;
-            label.dataset.originalText = item.text;
-            if (checkbox.checked) {
-                label.classList.add('checked');
-                label.innerHTML = label.dataset.originalText + " ✅";
-            }
-
-            li.appendChild(checkbox);
-            li.appendChild(label);
-            ul.appendChild(li);
-        });
-        container.appendChild(ul);
+    // UI 초기화: 현재 선택된 사람의 상태를 불러오고 UI 생성
+    loadUI(currentPerson);
+    
+    // 사람 선택 변경 시 UI 다시 빌드
+    personSelect.addEventListener('change', function(event) {
+        currentPerson = event.target.value;
+        loadUI(currentPerson);
     });
+    
+    // UI를 불러오는 함수: 쿠키에서 해당 사람의 체크 상태를 불러온 후 UI 빌드
+    function loadUI(person) {
+        // 쿠키 이름: checklistState_진규 또는 checklistState_민경
+        var cookieState = getCookie("checklistState_" + person);
+        var checklistState = cookieState ? JSON.parse(cookieState) : {};
+        // 컨테이너 초기화
+        container.innerHTML = "";
+        buildUI(checklistState, person);
+    }
+    
+    // UI 생성 함수 (sections 배열을 이용)
+    function buildUI(savedState, person) {
+        sections.forEach(function(section) {
+            // 섹션 제목 생성
+            var header = document.createElement('h2');
+            header.className = 'section-header';
+            header.textContent = section.title;
+            container.appendChild(header);
 
-    // 체크박스 이벤트 처리: 체크/해제 시 쿠키 업데이트
+            // 섹션 항목 목록 생성
+            var ul = document.createElement('ul');
+            section.items.forEach(function(item) {
+                var li = document.createElement('li');
+                li.className = 'checklist-item';
+
+                // 체크박스 생성
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                // 각 항목 아이디는 그대로 사용하되, 체크 상태는 해당 사람의 쿠키 값에서 적용
+                checkbox.id = item.id;
+                if (savedState[item.id]) {
+                    checkbox.checked = true;
+                }
+
+                // 레이블 생성
+                var label = document.createElement('label');
+                label.htmlFor = item.id;
+                label.textContent = item.text;
+                label.dataset.originalText = item.text;
+                if (checkbox.checked) {
+                    label.classList.add('checked');
+                    label.innerHTML = label.dataset.originalText + " ✅";
+                }
+
+                li.appendChild(checkbox);
+                li.appendChild(label);
+                ul.appendChild(li);
+            });
+            container.appendChild(ul);
+        });
+    }
+    
+    // 체크박스 이벤트 처리: 변경 시 쿠키 업데이트 (선택한 사람의 상태)
     container.addEventListener('change', function(event) {
         if (event.target && event.target.matches('input[type="checkbox"]')) {
             var checkbox = event.target;
             var label = checkbox.nextElementSibling;
-
-            // 체크 상태를 객체에 업데이트한 후 쿠키에 100일 간 저장
+            
+            // 현재 사람에 대한 쿠키 키
+            var cookieKey = "checklistState_" + currentPerson;
+            // 기존 쿠키 상태를 가져온 후 업데이트
+            var cookieState = getCookie(cookieKey);
+            var checklistState = cookieState ? JSON.parse(cookieState) : {};
             checklistState[checkbox.id] = checkbox.checked;
-            setCookie("checklistState", JSON.stringify(checklistState), 100);
-
+            // 쿠키에 100일간 저장
+            setCookie(cookieKey, JSON.stringify(checklistState), 100);
+            
             if (checkbox.checked) {
                 label.classList.add('checked');
                 label.innerHTML = label.dataset.originalText + " ✅";
