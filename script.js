@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // 로컬 스토리지에서 저장된 체크 상태 읽기 (없으면 빈 객체)
+    var savedState = localStorage.getItem('checklistState');
+    var checklistState = savedState ? JSON.parse(savedState) : {};
+
     // 각 섹션별 항목들을 구성합니다.
     var sections = [
         {
@@ -75,6 +79,10 @@ document.addEventListener('DOMContentLoaded', function() {
             var checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.id = item.id;
+            // 로컬 스토리지에 저장된 상태에 따라 체크 여부 설정
+            if (checklistState[item.id]) {
+                checkbox.checked = true;
+            }
 
             // 레이블 생성
             var label = document.createElement('label');
@@ -82,6 +90,11 @@ document.addEventListener('DOMContentLoaded', function() {
             label.textContent = item.text;
             // 원본 텍스트 저장 (체크 해제 시 복원 용도)
             label.dataset.originalText = item.text;
+            // 초기 저장된 상태에 따른 스타일 업데이트
+            if (checkbox.checked) {
+                label.classList.add('checked');
+                label.innerHTML = label.dataset.originalText + " ✅";
+            }
 
             li.appendChild(checkbox);
             li.appendChild(label);
@@ -90,11 +103,16 @@ document.addEventListener('DOMContentLoaded', function() {
         container.appendChild(ul);
     });
 
-    // 이벤트 위임: 체크박스 체크/해제 시 스타일과 이모지 업데이트
+    // 이벤트 위임: 체크박스 체크/해제 시 스타일 및 로컬 스토리지 업데이트
     container.addEventListener('change', function(event) {
         if (event.target && event.target.matches('input[type="checkbox"]')) {
             var checkbox = event.target;
             var label = checkbox.nextElementSibling;
+
+            // 체크 상태를 객체에 업데이트하고 로컬 스토리지에 저장
+            checklistState[checkbox.id] = checkbox.checked;
+            localStorage.setItem('checklistState', JSON.stringify(checklistState));
+
             if (checkbox.checked) {
                 label.classList.add('checked');
                 label.innerHTML = label.dataset.originalText + " ✅";
